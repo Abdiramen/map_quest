@@ -1,7 +1,5 @@
 #Map Quest
 ##Concept
 Map Quest is a simplistic text based dungeon crawler
-##v1.0.0
-* One map
-* Arrow controls
-* simple colors
+##v1.1.0
+* Random 40x40 map generation using prims algorithm

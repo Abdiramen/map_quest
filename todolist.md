@@ -1,6 +1,6 @@
 #To do list
 1. Maze Algorithm
-	* Prims Algorithm
+	* ~~Prims Algorithm~~ (Done)
 2. Menus
 3. Timer
 4. Obstacles
