@@ -108,10 +108,8 @@ int wall_array::get_size()
 
 void wall_array::add_neighbors(wall* a_wall, char** map, int y_max, int x_max)
 {
-mvprintw(LINES-1,COLS/2,"add_neighbors");
-refresh();
-usleep(500);
-//getch();
+  refresh();
+  usleep(50);
 
   wall* temp;
 
@@ -145,39 +143,38 @@ usleep(500);
 
 void wall_array::rec_add(wall* a_wall, char** map, int y_max, int x_max)
 {
-mvprintw(LINES-1,COLS/2,"rec_adding   ");
-refresh();
-usleep(500);
+  refresh();
   switch(map[a_wall->y][a_wall->x])
   {
     case 'S':
       add_wall(a_wall);
       map[a_wall->y][a_wall->x]='L';
-mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
+      mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
 ;
       break;
     case ' ':
       map[a_wall->y][a_wall->x]='V';
       add_neighbors(a_wall, map, y_max, x_max);
-attron(COLOR_PAIR(3));
-mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
-attroff(COLOR_PAIR(3));
+      attron(COLOR_PAIR(3));
+      mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
+      attroff(COLOR_PAIR(3));
 
       break;
     case 'L':
       remove_wall(a_wall);
       map[a_wall->y][a_wall->x]='#';
 
-attron(COLOR_PAIR(1));
- mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
-attroff(COLOR_PAIR(1));
+      attron(COLOR_PAIR(1));
+      mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
+      attroff(COLOR_PAIR(1));
 
      break;
   }
-refresh();
-usleep(500);
+  refresh();
+  usleep(500);
   return;
 }
+
 void wall_array::print()
 {
   for(int i = 0; i< m_max ; i++)

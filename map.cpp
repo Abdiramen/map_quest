@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
 #include "wall.h"
 #include <cstdlib>
 #include <ctime>
@@ -12,42 +10,10 @@ bool victory(const int y, const int x, char const*const*map);
 int main()
 {
   srand(time(NULL));
-  std::ifstream fin;
   int map_hight, map_width, y_start=1, x_start=1, step, x, y;
   char **map;
+  bool go=true;
   
-  fin.open("maptest.txt");
-  
-  //Gets map dimensions
-  fin>>map_width>>map_hight;
-  y_start= rand()%(map_width-2)+1;
-  y=y_start;
-  x_start= rand()%(map_hight-2)+1;
-  x=x_start;
-  //-----------------------------//
-  //building map
-  map = new char*[map_hight];
-
-  for(int k = 0; k < map_hight; k++)
-    map[k] = new char[map_width];
-  //-----------------------------//
-  fin.ignore();
-  //Putting map file into map
-  for(int k = 0; k < map_hight ; k++)
-  {
-    for(int i = 0; i < map_width ; i++)
-      {
-        fin.get(map[k][i]);
-        if(map[k][i]=='B')
-        {
-          //y = k;
-          //x = i;
-          //map[k][i] = 'O';
-        }
-      }
-    fin.ignore();
-  }
-  fin.close();
 
   initscr();  
   start_color();
@@ -55,23 +21,89 @@ int main()
   init_pair(2, COLOR_WHITE, COLOR_CYAN);
   init_pair(3, COLOR_MAGENTA, COLOR_MAGENTA);
   init_pair(4, COLOR_CYAN, COLOR_CYAN);
+  init_pair(5, COLOR_GREEN, COLOR_GREEN);
+  keypad(stdscr,true);
+  cbreak();
+  //Geting hight and width from user.
+  while(go)
+  {
+    mvprintw(LINES/2,(COLS-31)/2,"Please enter a hight in (6,%d).  ",LINES);
+    refresh();
+    scanw("%d",&map_hight);
+    clear();
+    if(map_hight > LINES || map_hight < 6)
+    {
+      clear();
+      mvprintw(LINES/2,(COLS-31)/2,"Size not supported by Terminal.");
+      refresh();
+      getch();
+      clear();
+    }
+    else
+      {
+        mvprintw(LINES/2,(COLS-31)/2,"Please enter a width in (6,%d).  ",COLS);
+        refresh();
+	scanw("%d",&map_width);
+        clear();
+        if(map_width > COLS || map_width < 6)
+        {
+          mvprintw(LINES/2,(COLS-31)/2,"Size not supported by Terminal.");
+          refresh();
+          getch();
+          clear();
+        }
+        else
+          go = false;
+      }
+    clear();
+  }
   cbreak();
   noecho();
-  keypad(stdscr,true);
- 
+
+  //Building map.
+  map = new char*[map_hight];
+  for(int k=0; k<map_hight; k++)
+    map[k]=new char[map_width];
+
+  for(int k= 0; k<map_hight;k++)
+  {
+    for(int j= 0; j<map_width; j++)
+    {
+      if(k%2==0)
+        if(j%2==0)
+          map[k][j]='#';
+        else
+          map[k][j]='S';
+      else if(j%2==0)
+        map[k][j]='S';
+      else
+        map[k][j]=' ';
+
+      if(k==0||k==map_hight-1)
+        map[k][j]='#';
+      if(j==0 || j==map_width-1)
+        map[k][j]='#';
+    }
+  }
+  //-----------------------------//
+  //Picking random start points.
+  y_start= rand()%(map_hight-2)+1;
+  y=y_start;
+  x_start= rand()%(map_width-2)+1;
+  x=x_start;
+  //-----------------------------//
 
   for(int k = 0; k < map_hight ; k++)
   {
     for(int i = 0; i < map_width ; i++)
       {
-        //note: try and add color here later
         if(map[k][i]=='#')
         {
           attron(COLOR_PAIR(1));
           mvprintw(k,i,"%c",map[k][i]);
           attroff(COLOR_PAIR(1));
         }
-        else if(/*map[k][i]=='V'||*/map[k][i]=='S')
+        else if(map[k][i]=='S')
         {
           attron(COLOR_PAIR(4));
           mvprintw(k,i,"%c",map[k][i]);
@@ -86,7 +118,8 @@ int main()
       } 
   }
   getch();
-//testing myprims algorithm
+
+  //Implimentation of prims algorithm.
   wall* a_wall = new wall(y_start,x_start);
   wall_array wall_list;
   bool stop = false;
@@ -98,38 +131,30 @@ int main()
     {
       stop=true;
       map[a_wall->y][a_wall->x]='E';
-mvprintw(a_wall->y,a_wall->x,"#"/*,map[a_wall->y][a_wall->x]*/);
-refresh();
+      mvprintw(a_wall->y,a_wall->x,"#");
+      refresh();
       delete a_wall;
     }
     else
     {
       delete a_wall;
       a_wall = new wall(wall_list.rand_wall());
-wall_list.remove_wall(a_wall);
+      wall_list.remove_wall(a_wall);
       map[a_wall->y][a_wall->x]='V';
 
       wall_list.add_neighbors(a_wall,map,map_hight,map_width);
-attron(COLOR_PAIR(3));
-mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
-attroff(COLOR_PAIR(3));
-
-mvprintw(0,COLS/2,"%3d",wall_list.get_size());
-wall_list.print();
-refresh();
+      attron(COLOR_PAIR(3));
+      mvprintw(a_wall->y,a_wall->x,"%c",map[a_wall->y][a_wall->x]);
+      attroff(COLOR_PAIR(3));
+      refresh();
     }
-//getch();
   }
   while(!stop);
-
-map[y][x]='O';
-clear();
 
   for(int k = 0; k < map_hight ; k++)
   {
     for(int i = 0; i < map_width ; i++)
       {
-        //note: try and add color here later
         if(map[k][i]=='#')
         {
           attron(COLOR_PAIR(1));
@@ -150,16 +175,18 @@ clear();
         }
       } 
   }
+  attron(COLOR_PAIR(5));
+  mvprintw(y_start,x_start," ");
+  attroff(COLOR_PAIR(5));
   refresh();
 
-//---------------------------------------------------------------//
-  mvprintw(map_hight,0,"You are the O, move with the arrow keys, \nand hit q to quit. White are walls and \nyou are a snail so you'll leave a trail");
+//----------------User inputs to game starts here----------------//
+  mvprintw(map_hight,0,"You are the green snail, move with the arrow keys, \nhit q to quit. White are walls and the path is purple.");
   move(y,x);
   refresh();
 
   while( step !='q' && ((step = getch()) != 'q'))
   {
-    //movement
     switch(step)
     {
       case KEY_UP:
@@ -178,7 +205,10 @@ clear();
           map[y+1][x] = ' ';
           mvprintw(y+1, x, "%c",map[y+1][x]);
           map[y][x] = 'O';
+
+          attron(COLOR_PAIR(5));
           mvprintw(y, x, "%c",map[y][x]);
+          attroff(COLOR_PAIR(5));
           move(y,x);
         }
         break;
@@ -198,7 +228,10 @@ clear();
           map[y-1][x] = ' ';
           mvprintw(y-1, x, "%c",map[y-1][x]);
           map[y][x] = 'O';
+          attron(COLOR_PAIR(5));
           mvprintw(y, x, "%c",map[y][x]);
+          attroff(COLOR_PAIR(5));
+  
           move(y,x);
         }
         break;
@@ -218,7 +251,10 @@ clear();
           map[y][x+1] = ' ';
           mvprintw(y, x+1, "%c",map[y][x+1]);
           map[y][x] = 'O';
+          attron(COLOR_PAIR(5));
           mvprintw(y, x, "%c",map[y][x]);
+          attroff(COLOR_PAIR(5));
+
           move(y,x);
         }
         break;
@@ -238,7 +274,10 @@ clear();
           map[y][x-1] = ' ';
           mvprintw(y, x-1, "%c",map[y][x-1]);
           map[y][x] = 'O';
+          attron(COLOR_PAIR(5));
           mvprintw(y, x, "%c",map[y][x]);
+          attroff(COLOR_PAIR(5));
+
           move(y,x);
         }
         break;
