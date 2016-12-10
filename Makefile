@@ -3,7 +3,7 @@ CFLAGS=
 LDFLAGS=-lncurses
 HEADERS=$(wildcard:*.h)
 
-map_quest: map.o wall.o
+map_quest: map.o wall.o prim.o 
 	${CPP} ${CFLAGS} ${LDFLAGS} $^ -o $@
 
 %.o: %.cpp ${HEADERS}
