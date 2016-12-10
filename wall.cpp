@@ -33,7 +33,7 @@ wall* wall_array::get_wall(int index)
 
 wall* wall_array::rand_wall()
 {
- return m_data[rand()%(m_size)];//get_wall(rand()%);//<--this should be better
+ return get_wall(rand()%m_size+1);//<--this should be better //m_data[rand()%(m_size)];
 }
 
 //Note: add_wall is ugly try and make the if case not so bloated.
